@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AG Android 4.0 — промо-экран: поведение нижнего блока</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300..1000&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #67b279;
+    --green-dark: #5aa26c;
+    --text-main: #3d3d3d;
+    --page-bg: #17191d;
+    --panel: #1f2228;
+    --panel-border: #2c313a;
+    --page-text: #e8eaed;
+    --page-muted: #9aa3ad;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--page-bg);
+    color: var(--page-text);
+    font-family: "Roboto Flex", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+
+  header p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--page-muted);
+    margin: 0 0 6px;
+    max-width: 640px;
+  }
+
+  header a {
+    color: var(--green);
+    text-decoration: none;
+  }
+  header a:hover { text-decoration: underline; }
+
+  .stage {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Телефон ---------- */
+
+  .phone-wrap { flex: none; }
+
+  .phone {
+    position: relative;
+    width: 360px;
+    height: 700px;
+    background: #fff;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 10px #23262d,
+      0 0 0 11px #3a3f49,
+      0 28px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    scrollbar-width: none;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+
+  .pic {
+    position: relative;
+    flex: none;
+    font-size: 0;
+  }
+  .pic img { display: block; width: 360px; height: auto; }
+
+  .screen-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .screen-close img { display: block; width: 24px; height: 24px; }
+
+  .content {
+    flex: none;
+    padding-bottom: 16px;
+  }
+
+  .promo-title {
+    margin: 0;
+    padding: 0 16px;
+    font-size: 40px;
+    line-height: 1.1;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  /* Карточка скидки */
+  .discont {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 16px 16px 0;
+    padding: 12px 12px 12px 16px;
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: height 0.25s ease, opacity 0.25s ease, margin 0.25s ease,
+      padding 0.25s ease, border-width 0.25s ease;
+  }
+  .discont.closed {
+    opacity: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+  .discont-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text-main);
+    line-height: 1.3;
+  }
+  .discont-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .discont-desc {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .discont-close {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .discont-close img { display: block; width: 24px; height: 24px; }
+
+  /* Список фич */
+  .items {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 8px 0 0;
+  }
+  .items li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 16px;
+  }
+  .items img {
+    flex: none;
+    width: 24px;
+    height: 24px;
+  }
+  .items span {
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--text-main);
+    padding: 3px 0;
+  }
+
+  /* Полный нижний блок (в конце скролла) */
+  .full-block {
+    margin-top: auto;
+    padding: 8px 0;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+  }
+
+  .btn-row { padding: 8px 16px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    min-height: 56px;
+    padding: 16px;
+    border: 0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: filter 0.12s ease;
+  }
+  .btn:active { filter: brightness(0.92); }
+
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .btn-secondary {
+    background: #fff;
+    border: 1px solid var(--text-main);
+    color: var(--text-main);
+  }
+
+  .btn-link {
+    background: none;
+    min-height: 0;
+    padding: 8px 16px;
+    color: var(--green);
+  }
+
+  /* Прилипающая свёрнутая плашка */
+  .sticky {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    padding: 16px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.3s;
+  }
+  .sticky.visible {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .sticky::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -36px;
+    height: 36px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+    pointer-events: none;
+  }
+
+  /* ---------- Панель управления ---------- */
+
+  .panel {
+    flex: 1;
+    min-width: 280px;
+    max-width: 380px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .panel h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--page-muted);
+    margin: 0 0 16px;
+  }
+
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .control-label b { font-size: 14px; }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--green);
+    cursor: pointer;
+  }
+
+  .range-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--page-muted);
+    margin-top: 4px;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .preset {
+    border: 1px solid var(--panel-border);
+    background: #262a32;
+    color: var(--page-text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .preset:hover { border-color: var(--green); }
+  .preset.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .state {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 20px;
+    padding: 12px 14px;
+    background: #262a32;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .state-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-top: 5px;
+    transition: background 0.2s ease;
+  }
+  .state-dot.at-end { background: #5b9dd9; }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--page-muted);
+  }
+
+  @media (max-width: 820px) {
+    .stage { gap: 24px; }
+    .phone { margin: 0 auto; }
+    .panel { max-width: none; width: 100%; }
+    .wrap { padding: 24px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Промо-экран AG Android 4.0 — поведение нижнего блока</h1>
+    <p>На маленьком экране нижний блок сворачивается до одной кнопки и прилипает к низу,
+       а контент скроллится под ней. В самом конце скролла прилипшая кнопка уступает место
+       полному блоку из трёх кнопок.</p>
+    <p>
+      <a href="https://www.figma.com/design/onFRaBxbFH8nkVgqP72xUr/branch/vgDBVEr3yugq6k0rXBNYlY/AG-Android-4.0-Main-screen?node-id=24561-47466&t=DPniMd7uIigIuORK-11" target="_blank" rel="noopener">Макет: полный экран ↗</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.figma.com/design/onFRaBxbFH8nkVgqP72xUr/branch/vgDBVEr3yugq6k0rXBNYlY/AG-Android-4.0-Main-screen?node-id=24561-55735&t=DPniMd7uIigIuORK-11" target="_blank" rel="noopener">Макет: маленький экран ↗</a>
+    </p>
+  </header>
+
+  <div class="stage">
+    <div class="phone-wrap">
+      <div class="phone" id="phone">
+        <div class="screen" id="screen">
+          <div class="pic">
+            <img src="assets/pic.png" alt="Agnar со щитом" width="360" height="298">
+            <button class="screen-close" aria-label="Закрыть экран">
+              <img src="assets/cross-screen.svg" alt="">
+            </button>
+          </div>
+
+          <div class="content">
+            <h2 class="promo-title">Your Internet. Fully&nbsp;protected</h2>
+
+            <div class="discont" id="discont">
+              <div class="discont-text">
+                <p class="discont-title">🛍️ Black Friday 2026</p>
+                <p class="discont-desc">50% off the first year! For annual subscriptions</p>
+              </div>
+              <button class="discont-close" id="discontClose" aria-label="Скрыть акцию">
+                <img src="assets/cross.svg" alt="">
+              </button>
+            </div>
+
+            <ul class="items">
+              <li><img src="assets/ic-tv.svg" alt=""><span>Shield up to 9 devices: Windows, macOS, Android, or iOS</span></li>
+              <li><img src="assets/ic-gamepad.svg" alt=""><span>Block ads in games and other apps</span></li>
+              <li><img src="assets/ic-tracker.svg" alt=""><span>Hide your activity from trackers</span></li>
+              <li><img src="assets/ic-phishing.png" alt=""><span>Protect yourself from phishing and threats</span></li>
+            </ul>
+          </div>
+
+          <div class="full-block" id="fullBlock">
+            <div class="btn-row"><button class="btn btn-primary" type="button">Get full protection</button></div>
+            <div class="btn-row"><button class="btn btn-secondary" type="button">Try 14 days for free</button></div>
+            <div class="btn-row"><button class="btn btn-link" type="button">Already purchased?</button></div>
+          </div>
+        </div>
+
+        <div class="sticky" id="sticky">
+          <button class="btn btn-primary" type="button">Get full protection</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <h2>Управление</h2>
+
+      <div class="control-label">
+        <span>Высота экрана</span>
+        <b><span id="heightValue">700</span> px</b>
+      </div>
+      <input type="range" id="heightSlider" min="500" max="980" step="1" value="700" aria-label="Высота экрана">
+      <div class="range-scale"><span>500</span><span>980</span></div>
+
+      <div class="presets" id="presets">
+        <button class="preset" data-h="929" type="button">929 — влезает целиком</button>
+        <button class="preset active" data-h="700" type="button">700 — как в макете</button>
+        <button class="preset" data-h="560" type="button">560 — совсем мало</button>
+      </div>
+
+      <div class="state">
+        <div class="state-dot" id="stateDot"></div>
+        <div id="stateText">Экран мал: блок свёрнут, кнопка «Get full protection» прилипла к низу</div>
+      </div>
+
+      <p class="hint">
+        Скрольте прямо внутри телефона (колесо мыши или тач). Меняйте высоту экрана слайдером —
+        блок внизу сам подстраивается. Крестик на карточке акции тоже работает: место не
+        резервируется, элементы раздвигаются.
+      </p>
+    </aside>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var phone = document.getElementById('phone');
+    var screen = document.getElementById('screen');
+    var sticky = document.getElementById('sticky');
+    var fullBlock = document.getElementById('fullBlock');
+    var slider = document.getElementById('heightSlider');
+    var heightValue = document.getElementById('heightValue');
+    var stateText = document.getElementById('stateText');
+    var stateDot = document.getElementById('stateDot');
+    var presets = document.getElementById('presets');
+
+    var ticking = false;
+    var currentH = 700;
+
+    function update() {
+      ticking = false;
+
+      var sRect = screen.getBoundingClientRect();
+      var bRect = fullBlock.getBoundingClientRect();
+      var barH = sticky.offsetHeight; // 88
+      var buffer = 12;
+
+      // Полный блок доехал до прилипающей плашки — убираем плашку
+      var atEnd = bRect.top <= sRect.bottom - barH - buffer;
+      sticky.classList.toggle('visible', !atEnd);
+
+      var scrollable = screen.scrollHeight > screen.clientHeight + 1;
+      var text;
+      if (!scrollable) {
+        text = 'Контент влезает целиком: снизу полный блок из трёх кнопок, сворачивать нечего';
+        stateDot.classList.add('at-end');
+      } else if (atEnd) {
+        text = 'Доскроллили до конца: прилипшая кнопка уступила место полному блоку из трёх кнопок';
+        stateDot.classList.add('at-end');
+      } else {
+        text = 'Экран мал: блок свёрнут, кнопка «Get full protection» прилипла к низу';
+        stateDot.classList.remove('at-end');
+      }
+      stateText.textContent = text;
+    }
+
+    function requestUpdate() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }
+
+    function setHeight(h) {
+      currentH = h;
+      phone.style.height = h + 'px';
+      heightValue.textContent = h;
+      Array.prototype.forEach.call(presets.children, function (btn) {
+        btn.classList.toggle('active', Number(btn.dataset.h) === h);
+      });
+      requestUpdate();
+    }
+
+    slider.addEventListener('input', function () {
+      setHeight(Number(slider.value));
+    });
+
+    presets.addEventListener('click', function (e) {
+      var btn = e.target.closest('.preset');
+      if (!btn) return;
+      slider.value = btn.dataset.h;
+      setHeight(Number(btn.dataset.h));
+    });
+
+    screen.addEventListener('scroll', requestUpdate, { passive: true });
+    if (window.ResizeObserver) {
+      new ResizeObserver(requestUpdate).observe(screen);
+    }
+    window.addEventListener('resize', requestUpdate);
+
+    // Закрытие карточки акции: место не резервируется, элементы раздвигаются
+    document.getElementById('discontClose').addEventListener('click', function () {
+      var card = document.getElementById('discont');
+      card.style.height = card.offsetHeight + 'px';
+      // фиксируем высоту, чтобы transition сработал
+      void card.offsetHeight;
+      card.classList.add('closed');
+      card.style.height = '0px';
+    });
+
+    setHeight(700);
+
+    // Состояние через URL: ?h=700&scroll=bottom — удобно шарить конкретный кейс
+    var params = new URLSearchParams(location.search);
+    var h = parseInt(params.get('h'), 10);
+    if (h >= 500 && h <= 980) {
+      slider.value = h;
+      setHeight(h);
+    }
+    if (params.get('scroll') === 'bottom') {
+      screen.scrollTop = screen.scrollHeight;
+    }
+
+    update();
+  })();
+</script>
+</body>
+</html>
